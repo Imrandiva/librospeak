@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Librarian</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 5rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        #buttons-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        #buttons-container form {
+            display: inline-block; 
+        }
+
+        #run-main-btn, #run-manual-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #run-main-btn:hover, #run-manual-btn:hover {
+            background-color: "#0056b3";
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        #books-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 3rem;
+        }
+    </style>
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+    function toggleCollapsible(id) {
+        var element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    }
+
+        $(document).ready(function() {
+            
+            
+            // Function to fetch and update books list
+            function updateBooksList() {
+                $.ajax({
+                    url: "/get_books",
+                    type: "GET",
+                    success: function(response) {
+                        $("#books-list").empty();
+                        $("#books-list").append("<tr><th>Title</th><th>Authors</th><th>Description</th></tr>");;
+                        $.each(response.books, function(index, book) {
+                            console.log(book)
+                            $("#books-list").append("<tr><td>" + book.title + "</td><td>" + book.authors + "</td><td>" + book.intro + "</td></tr>");
+
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching books:", error);
+                    }
+                });
+            }
+    
+            // Function to run gpt mode
+            $("#run-main-btn").click(function() {
+                $.ajax({
+                    url: "/run_main",
+                    type: "POST",
+                    success: function(response) {
+                        console.log("Main executed successfully");
+                        speakText(response.message);  
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error running main:", error);
+                    }
+                });
+            });
+
+            // Function to run manual mode
+            $("#run-manual-btn").click(function() {
+                $.ajax({
+                    url: "/run_manual",
+                    type: "POST",
+                    success: function(response) {
+                        console.log("Main executed successfully");
+                        speakText(response.message); 
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error running main:", error);
+                    }
+                });
+            });
+
+    
+            updateBooksList();
+            
+        
+            //setInterval(updateBooksList, 20000); // Update booklist every 20 seconds
+        });
+
+        
+    </script>
+    
+</head>
+<body>
+    
+    <h1>Intelligent Librarian</h1>
+
+
+    <ul id="convo">
+
+        
+
+    </ul>
+    
+    <h2>Books in the Database</h2>
+    <ul id="books-list">
+
+        
+
+    </ul>
+    <h2>Add a new book</h2>
+    <div id="buttons-container">
+        <form id="mainForm1" action="/run_main" method="POST">
+            <input id="run-main-btn" type="button" value="GPT Mode">
+        </form>
+        <form id="mainForm2" action="/run_manual" method="POST">
+            <input id="run-manual-btn" type="button" value="Manual Mode">
+        </form>
+    </div>
+
+    <div style="margin: 4rem;">
+    <h3>Instructions</h3>
+    
+    <h4>Manual mode</h4>
+    <p>The user should follow this direction when recording the book information:</p>
+
+    <ol>
+        <li>(The) <strong>title</strong> (of the book) is <em>(...)</em> (and)</li>
+        <li>(The) <strong>author(s)</strong> (of the book) is(are) <em>(...)</em> A (and B and C)</li>
+    </ol>
+
+    <p>You must say the title of the book in the first step so that the system can process it; otherwise, you need to say the whole sentence again.</p>
+
+
+    <h4>GPT mode</h4>
+    <p>The user is allowed to speak freely, but try to make it clear what the title is and who the authors are</p>
+
+    <p>Make sure to say "yes" clearly when you are asked to confirm an action</p>
+
+    </div>
+
+   
+    
+</body>
+</html>
